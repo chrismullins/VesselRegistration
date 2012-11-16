@@ -37,11 +37,12 @@ int main(int argc, char * argv[])
   typedef itk::MetaLandmarkConverter< Dimension > metaReaderType;
 	const char * fixedLandmarkFilename = argv[3];
   metaReaderType fixedLandmarkReader;
-  //fixedLandmarkReader.ReadMeta(fixedLandmarkFilename);
 
 	const char * movingLandmarkFilename = argv[4];
   metaReaderType movingLandmarkReader;
-  //movingLandmarkReader.ReadMeta(movingLandmarkFilename);
+
+  const char * outputMovingFilename = argv[5];
+  const char * outputTransformFilename = argv[6];
 
   //make spatial objects out of them
   typedef itk::LandmarkSpatialObject<Dimension> landmarkSOType;
@@ -50,9 +51,7 @@ int main(int argc, char * argv[])
   landmarkSOType::Pointer movingLandmarkSO = landmarkSOType::New();
   movingLandmarkSO = movingLandmarkReader.ReadMeta(movingLandmarkFilename);
 
-  //fixedLandmarkSO.Print(std::cout);
-
-	typedef itk::AffineTransform< double, 3 > TransformType;
+  typedef itk::VersorRigid3DTransform< double > TransformType;
 	typedef itk::LandmarkBasedTransformInitializer< TransformType, ImageType, ImageType >
 		LandmarkBasedTransformInitializerType;
 
@@ -65,24 +64,6 @@ int main(int argc, char * argv[])
 	LandmarkContainerType fixedLandmarks;
 	LandmarkContainerType movingLandmarks;
 	
-//	LandmarkPointType fixedPoint;
-//	LandmarkPointType movingPoint;
-//
-//	fixedPoint[0] = 13.2;
-//	fixedPoint[1] = 1.6;
-//	fixedPoint[2] = 4.1;
-//	movingPoint[0] = 1.6;
-//	movingPoint[1] = 5.05;
-//	movingPoint[2] = 6.35;
-//	fixedLandmarks.push_back(fixedPoint);
-
-//	fixedLandmarks.push_back( fixedLandmarkReader->GetMetaDataDictionary().Find("Points" );
-//	movingLandmarks.push_back( movingLandmarkReader->GetMetaDataDictionary().Find("Points") );
-  //std::cout << fixedLandmarkSO->GetPoints().ToLatin1() << std::endl;
-
-  //typedef itk::Point PointType;
-  //fixedLandmarks.push_back( fixedLandmarkSO->GetPoints());
-  //movingLandmarks.push_back( movingLandmarkSO->GetPoints());
   unsigned int nPoints = fixedLandmarkSO->GetPoints().size();
   std::cout << "Number of Points in the fixed landmark: " << nPoints << std::endl;
 
@@ -114,6 +95,12 @@ int main(int argc, char * argv[])
 	landmarkBasedTransformInitializer->SetTransform(transform);
 	landmarkBasedTransformInitializer->InitializeTransform();
 
+  typedef itk::TransformFileWriter TransformWriterType;
+  TransformWriterType::Pointer transformWriter = TransformWriterType::New();
+  transformWriter->SetFileName(outputTransformFilename);
+  transformWriter->SetInput(transform);
+  transformWriter->Update();
+
 	typedef itk::ResampleImageFilter<ImageType, ImageType, double > ResampleFilterType;
 	ResampleFilterType::Pointer resampleFilter = ResampleFilterType::New();
 	resampleFilter->SetInput( movingReader->GetOutput());
@@ -127,7 +114,7 @@ int main(int argc, char * argv[])
 	typedef itk::ImageFileWriter< ImageType > WriterType;
 	WriterType::Pointer writer = WriterType::New();
 	writer->SetInput( resampleFilter->GetOutput() );
-	writer->SetFileName( "Day7_Right_Register.mhd" );
+	writer->SetFileName( outputMovingFilename );
 	writer->Update();
 
 	return EXIT_SUCCESS;
