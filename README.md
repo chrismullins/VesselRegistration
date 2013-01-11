@@ -98,7 +98,7 @@ Another option to apply the merge is to run TubeTK's tubeMerge plugin from the c
 ### Using the Slicer Python interface
 Alternatively, you may wish to run several merges as a batch process while you are away.  This can be done fairly easily with a python script.
 I've defined a function which you can copy and paste into the python interactor which will invoke the tubeMerge process on two arguments (stationary and moving volumes).
-  ```
+  ```python
   def tubeMerge(volumeNodeStationary, volumeNodeMoving):
    parameters = {}
    parameters["inputVolume1"] = volumeNodeStationary.GetID()
@@ -110,7 +110,7 @@ I've defined a function which you can copy and paste into the python interactor 
    return (slicer.cli.run(tubeMergeCLI, None, parameters))
   ```
 After you've defined this method, go ahead and load the volumes you want to merge.
-  ```
+  ```python
   >>> slicer.util.loadVolume("/home/crmullin/TumorData/UpsampledMHDs_500group/DF/Animal508_df_left.mhd")
   >>> slicer.util.loadVolume("/home/crmullin/TumorData/Output/TransformedInSlicer/Animal508_df_right_TransformedInSlicer.mhd")
   >>> l = getNode('Animal508_df_left')
