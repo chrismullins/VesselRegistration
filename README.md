@@ -22,12 +22,12 @@ My Workflow
 -----------
 1. Clone and build the repository.
 
-  <pre>
+  ```console
   $ git clone git://github.com:chrismullins/VesselRegistration.git
   $ mkdir VesselRegistration-build && cd  VesselRegistration-build
   $ cmake -DITK_DIR:PATH=/path/to/ITK-build ../VesselRegistration
   $ make
-  </pre>
+  ```
 
 2. [Gather the data from MIDAS](midas3.kitware.com)
 
@@ -40,20 +40,20 @@ A likely name for the first images of interest are `Animal508_df_left.mhd` and `
 We will be using images in the [MetaIO format](http://www.itk.org/Wiki/ITK/MetaIO/Documentation#ITK_MetaIO).
 
   Run the transform:
- <pre>
+ ```console
  $ ./VesselRegistration \
  fixedImage.mhd movingImage.mhd \
  fixedLandmark.lnd movingLandmark.lnd \
  outputImageName.mhd outputTransformName.tfm
- </pre>
+ ```
 
   In this case, it would translate to the following:
-  <pre>
+  ```console
   $ ./VesselRegistration \
   ~/TumorData/UpsampledMHDs_500group/DF/Animal508_df_left.mhd ~/TumorData/UpsampledMHDs_500group/DF/Animal508_df_right.mhd \
   ~/TumorData/Landmarks/508_landmark_left.lnd ~/TumorData/Landmkarks/508_landmark_right.lnd \
   ~/TumorData/TransformedImages/Animal508_df_right_transformed.mhd ~/TumorData/Transforms/508_df_transform.tfm
-  </pre>
+  ```
 
 5.  Now we should have an output image saved and a transform written out which maps the right image onto the left.  We could simply use the image that has been written out, but I've found that sometimes Slicer doesn't appreciate it.  So we can simply open up the original moving (right) image in Slicer, and apply the transform we've written using the [Slicer Transforms module](http://www.slicer.org/slicerWiki/index.php/Documentation/4.0/Modules/Transforms).
 
@@ -89,7 +89,7 @@ Now, navigate to the module named "Merge (TubeTK)" in the Modules searchbar.  If
 Checkout the [Slicer GUI TubeTK merge video](http://www.youtube.com/watch?v=RrypHDO3U4Y&feature=youtu.be) courtesy of Nathan Taylor.
 
 Another option to apply the merge is to run TubeTK's tubeMerge plugin from the command line.  In order to do this, you'll have to [build TubeTK](http://public.kitware.com/Wiki/TubeTK/Development/Build).
-  ```
+  ```console
   $ /path/to/TubeTk-build/bin/tubeMerge \
    ~/TumorData/UpsampledMHDs_500group/DF/Animal508_df_left.mhd -m \
    ~/TumorData/Output/TransformedInSlicer/Animal508_df_right_TransformedInSlicer.mhd \
@@ -122,7 +122,7 @@ Note that the `tubeMerge` module will run in a background thread, so the call to
 This should perform the merge after an hour or so (for a large volume).  TubeTK will output a compressed file ending in `.zraw`.
 Decompress it by using the `ImageMath` executable built into TubeTK.
 
-  ```
+  ```console
   $ /path/to/TubeTk-build/bin/ImageMath \
   ~/TumorData/Output/Merged/Animal508_df_MERGED.mhd -W 3 \
   ~/TumorData/Output/Merged/Decompressed/Animal508_df_MERGED_decompressed.mhd
