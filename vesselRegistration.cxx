@@ -20,25 +20,25 @@ typedef unsigned char PixelType;
 typedef itk::Image< PixelType, Dimension > ImageType;
 
 int main(int argc, char * argv[])
-{
-	// Read both images
-	typedef itk::ImageFileReader< ImageType > ReaderType;
-	ReaderType::Pointer fixedReader = ReaderType::New();
-	const char * fixedFilename = argv[1];
-	fixedReader->SetFileName( fixedFilename );
-	fixedReader->Update();
+  {
+  // Read both images
+  typedef itk::ImageFileReader< ImageType > ReaderType;
+  ReaderType::Pointer fixedReader = ReaderType::New();
+  const char * fixedFilename = argv[1];
+  fixedReader->SetFileName( fixedFilename );
+  fixedReader->Update();
 
-	ReaderType::Pointer movingReader = ReaderType::New();
-	const char * movingFilename = argv[2];
-	movingReader->SetFileName( movingFilename );
-	movingReader->Update();
+  ReaderType::Pointer movingReader = ReaderType::New();
+  const char * movingFilename = argv[2];
+  movingReader->SetFileName( movingFilename );
+  movingReader->Update();
 
-	// Read both landmark files
+  // Read both landmark files
   typedef itk::MetaLandmarkConverter< Dimension > metaReaderType;
-	const char * fixedLandmarkFilename = argv[3];
+  const char * fixedLandmarkFilename = argv[3];
   metaReaderType fixedLandmarkReader;
 
-	const char * movingLandmarkFilename = argv[4];
+  const char * movingLandmarkFilename = argv[4];
   metaReaderType movingLandmarkReader;
 
   const char * outputMovingFilename = argv[5];
@@ -52,17 +52,17 @@ int main(int argc, char * argv[])
   movingLandmarkSO = movingLandmarkReader.ReadMeta(movingLandmarkFilename);
 
   typedef itk::VersorRigid3DTransform< double > TransformType;
-	typedef itk::LandmarkBasedTransformInitializer< TransformType, ImageType, ImageType >
+  typedef itk::LandmarkBasedTransformInitializer< TransformType, ImageType, ImageType >
 		LandmarkBasedTransformInitializerType;
 
-	LandmarkBasedTransformInitializerType::Pointer landmarkBasedTransformInitializer = 
+  LandmarkBasedTransformInitializerType::Pointer landmarkBasedTransformInitializer = 
 		LandmarkBasedTransformInitializerType::New();
-	// Create source and target landmarks
-	typedef LandmarkBasedTransformInitializerType::LandmarkPointContainer LandmarkContainerType;
-	typedef LandmarkBasedTransformInitializerType::LandmarkPointType      LandmarkPointType;
+  // Create source and target landmarks
+  typedef LandmarkBasedTransformInitializerType::LandmarkPointContainer LandmarkContainerType;
+  typedef LandmarkBasedTransformInitializerType::LandmarkPointType      LandmarkPointType;
 
-	LandmarkContainerType fixedLandmarks;
-	LandmarkContainerType movingLandmarks;
+  LandmarkContainerType fixedLandmarks;
+  LandmarkContainerType movingLandmarks;
 	
   unsigned int nPoints = fixedLandmarkSO->GetPoints().size();
   std::cout << "Number of Points in the fixed landmark: " << nPoints << std::endl;
@@ -87,13 +87,13 @@ int main(int argc, char * argv[])
     }
 
 
-//	fixedLandmarkReader->GetMetaDataDictionary().Print(std::cout);
-	landmarkBasedTransformInitializer->SetFixedLandmarks( fixedLandmarks );
-	landmarkBasedTransformInitializer->SetMovingLandmarks( movingLandmarks );
+  //	fixedLandmarkReader->GetMetaDataDictionary().Print(std::cout);
+  landmarkBasedTransformInitializer->SetFixedLandmarks( fixedLandmarks );
+  landmarkBasedTransformInitializer->SetMovingLandmarks( movingLandmarks );
 
-	TransformType::Pointer transform = TransformType::New();
-	landmarkBasedTransformInitializer->SetTransform(transform);
-	landmarkBasedTransformInitializer->InitializeTransform();
+  TransformType::Pointer transform = TransformType::New();
+  landmarkBasedTransformInitializer->SetTransform(transform);
+  landmarkBasedTransformInitializer->InitializeTransform();
 
   typedef itk::TransformFileWriter TransformWriterType;
   TransformWriterType::Pointer transformWriter = TransformWriterType::New();
@@ -101,21 +101,21 @@ int main(int argc, char * argv[])
   transformWriter->SetInput(transform);
   transformWriter->Update();
 
-	typedef itk::ResampleImageFilter<ImageType, ImageType, double > ResampleFilterType;
-	ResampleFilterType::Pointer resampleFilter = ResampleFilterType::New();
-	resampleFilter->SetInput( movingReader->GetOutput());
-	resampleFilter->SetTransform( transform );
-	resampleFilter->SetSize( fixedReader->GetOutput()->GetLargestPossibleRegion().GetSize() );
-	resampleFilter->SetOutputOrigin( fixedReader->GetOutput()->GetOrigin() );
-	resampleFilter->SetOutputSpacing( fixedReader->GetOutput()->GetSpacing() );
-	resampleFilter->SetOutputDirection( fixedReader->GetOutput()->GetDirection() );
-	resampleFilter->GetOutput();
+  typedef itk::ResampleImageFilter<ImageType, ImageType, double > ResampleFilterType;
+  ResampleFilterType::Pointer resampleFilter = ResampleFilterType::New();
+  resampleFilter->SetInput( movingReader->GetOutput());
+  resampleFilter->SetTransform( transform );
+  resampleFilter->SetSize( fixedReader->GetOutput()->GetLargestPossibleRegion().GetSize() );
+  resampleFilter->SetOutputOrigin( fixedReader->GetOutput()->GetOrigin() );
+  resampleFilter->SetOutputSpacing( fixedReader->GetOutput()->GetSpacing() );
+  resampleFilter->SetOutputDirection( fixedReader->GetOutput()->GetDirection() );
+  resampleFilter->GetOutput();
 
-	typedef itk::ImageFileWriter< ImageType > WriterType;
-	WriterType::Pointer writer = WriterType::New();
-	writer->SetInput( resampleFilter->GetOutput() );
-	writer->SetFileName( outputMovingFilename );
-	writer->Update();
+  typedef itk::ImageFileWriter< ImageType > WriterType;
+  WriterType::Pointer writer = WriterType::New();
+  writer->SetInput( resampleFilter->GetOutput() );
+  writer->SetFileName( outputMovingFilename );
+  writer->Update();
 
-	return EXIT_SUCCESS;
+  return EXIT_SUCCESS;
 }
